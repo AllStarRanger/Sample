@@ -6,7 +6,15 @@ window.addEventListener("load", function () {
     //< WebApp Expand
     Telegram.WebApp.ready();
     Telegram.WebApp.expand();
-  });
+
+    //< Disable Vertical Swipes
+    //Telegram.WebApp.disableVerticalSwipes();
+
+    //< Version Check
+    //var version = Telegram.WebApp.version;
+    //var versionFloat = parseFloat(version);
+});
+
   var unityInstanceRef;
   var unsubscribe;
   var container = document.querySelector("#unity-container");
@@ -39,6 +47,18 @@ window.addEventListener("load", function () {
     updateBannerVisibility();
   }
 
+function isTelegramWebView() {
+    return Telegram.WebApp.initDataUnsafe.user != null;
+}
+
+function AppQuit() {
+    Telegram.WebApp.close();
+}
+
+function GetTelegramUserData() {
+    SendMessage('JavaToUnityManager', 'ReceiveTelegramUserData', Telegram.WebApp.initDataUnsafe.user);
+}
+
   var buildUrl = "Build";
   var loaderUrl = buildUrl + "/Build.loader.js";
   var config = {
@@ -46,9 +66,9 @@ window.addEventListener("load", function () {
     frameworkUrl: buildUrl + "/Build.framework.js.unityweb",
     codeUrl: buildUrl + "/Build.wasm.unityweb",
     streamingAssetsUrl: "StreamingAssets",
-    companyName: "DefaultCompany",
-    productName: "Sample",
-    productVersion: "1.0",
+    companyName: "solzam",
+    productName: "allstar",
+    productVersion: "1",
     showBanner: unityShowBanner,
   };
 
@@ -67,18 +87,24 @@ window.addEventListener("load", function () {
     document.getElementsByTagName('head')[0].appendChild(meta);
   }
 
+  canvas.style.background = "url('" + buildUrl + "/Build.jpg') center / cover";
   loadingBar.style.display = "block";
 
-  var script = document.createElement("script");
-  script.src = loaderUrl;
-  script.onload = () => {
-    createUnityInstance(canvas, config, (progress) => {
-      progressBarFull.style.width = 100 * progress + "%";
-    }).then((unityInstance) => {
-      unityInstanceRef = unityInstance;
-      loadingBar.style.display = "none";
-    }).catch((message) => {
-      alert(message);
-    });
-  };
-  document.body.appendChild(script);
+if (isTelegramWebView()) {
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+            progressBarFull.style.width = 100 * progress + "%";
+        }).then((unityInstance) => {
+            unityInstanceRef = unityInstance;
+            loadingBar.style.display = "none";
+        }).catch((message) => {
+            alert(message);
+        });
+    };
+    document.body.appendChild(script);
+}
+else {
+    alert("Can't be play in this environment!");
+}
